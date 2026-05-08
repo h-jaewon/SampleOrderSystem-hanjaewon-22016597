@@ -191,3 +191,41 @@
   - SubAgent3 판정에서 `dummy.py` 정상 동작 확인.
 - **대안:** 고정 문자열 하드코딩 — 다양한 입력값 검증 부족으로 배제.
 - **영향 파일:** `dummy.py`, `requirements.txt` (`faker` 패키지 버전 고정)
+
+---
+
+## ADR-015: OrderService 설계 — SampleRepository 공유 및 생성자 주입
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 3
+- **결정:** `OrderService`는 생성자에서 `SampleRepository`와 `OrderRepository` 두 인스턴스를 주입받는다. `main.py`에서 생성된 단일 `SampleRepository` 인스턴스를 `SampleService`와 `OrderService` 모두에 전달(공유)한다.
+- **이유:**
+  - `place_order()` 시 `sample_id` 유효성 검사를 위해 `SampleRepository.get()` 호출이 필요하다.
+  - `SampleRepository`를 공유하지 않으면 `SampleService`에서 등록한 시료가 `OrderService`에서 조회되지 않아 주문 접수가 불가능해진다.
+  - 생성자 주입으로 테스트 격리 보장: 각 테스트 케이스가 독립적인 저장소 인스턴스를 주입하여 상태 공유 없이 실행 가능.
+  - SampleService의 ADR-007과 동일한 DI 패턴을 일관되게 적용.
+- **대안:** OrderService 내부에서 SampleRepository를 직접 생성 — 테스트 격리 불가 및 main.py와의 인스턴스 불일치로 배제.
+- **의존성 주입 구조:**
+  ```
+  main()
+  ├── SampleRepository (단일 인스턴스)
+  ├── OrderRepository (단일 인스턴스)
+  ├── SampleService(sample_repository)
+  └── OrderService(sample_repository, order_repository)  ← SampleRepository 공유
+  ```
+- **영향 파일:** `src/services/order_service.py`, `main.py`
+
+---
+
+## ADR-016: dummy.py H-1 단계적 해소 전략
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 3
+- **결정:** `dummy.py`의 H-1 이슈(OrderRepository 직접 접근)를 단계적으로 해소한다. Phase 3에서 RESERVED 상태 주문 2건을 `OrderService.place_order()` 경유로 교체하고, 나머지 PRODUCING/CONFIRMED/RELEASED 4건은 Phase 4 이후 해소 예정으로 직접 주입 방식을 유지한다.
+- **이유:**
+  - RESERVED 주문은 `OrderService.place_order()`가 Phase 3에서 구현되므로 즉시 교체 가능하며, 서비스 레이어를 통한 정상 경로 사용이 올바른 설계이다.
+  - PRODUCING/CONFIRMED/RELEASED 상태 전환 로직은 Phase 4(`ApprovalService`)에서 구현 예정이다. Phase 3 범위에서 해당 상태를 서비스 레이어 없이 강제 주입하는 것은 불가피하다.
+  - 단계적 해소를 통해 각 Phase 완료 시 해당 Phase의 서비스 레이어를 거치도록 점진적으로 개선한다.
+- **H-1 잔여 항목:** PRODUCING 1건, CONFIRMED 1건, RELEASED 2건 — Phase 4 완료 후 해소 예정.
+- **코드 명시:** 직접 주입이 남아 있는 코드 블록에 `# PRODUCING/CONFIRMED/RELEASED 상태는 Phase 4 이후 해소 예정이므로 직접 주입 유지 (H-1).` 주석 유지.
+- **영향 파일:** `dummy.py`
