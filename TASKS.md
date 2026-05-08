@@ -54,17 +54,24 @@
   - [x] `dummy.py` — PRODUCING H-1 해소 (ApprovalService.approve_order() 경유 교체)
   - [x] `plan/design/phase4.md` — Phase 4 설계 문서
 
-- [ ] **Phase 5**: 모니터링 서비스
-  - [ ] `src/services/monitoring_service.py`
-  - [ ] `tests/phase5/test_monitoring_service.py`
+- [x] **Phase 5**: 모니터링 서비스
+  - [x] `src/services/monitoring_service.py` — MonitoringService 구현 (get_order_summary(), get_stock_status())
+  - [x] `src/views/monitoring_view.py` — 모니터링 뷰
+  - [x] `src/controllers/monitoring_controller.py` — 모니터링 컨트롤러
+  - [x] `main.py` — 모니터링 메뉴 활성화, MonitoringController 조립
 
-- [ ] **Phase 6**: 생산 라인 서비스
-  - [ ] `src/services/production_service.py`
-  - [ ] `tests/phase6/test_production_service.py`
+- [x] **Phase 6**: 생산 라인 서비스
+  - [x] `src/services/production_service.py` — ProductionService 구현 (get_production_status(), complete_production())
+  - [x] `src/views/production_view.py` — 생산 라인 뷰
+  - [x] `src/controllers/production_controller.py` — 생산 라인 컨트롤러
+  - [x] `main.py` — 생산 라인 메뉴 활성화, ProductionController 조립
 
-- [ ] **Phase 7**: 출고 서비스
-  - [ ] `src/services/shipment_service.py`
-  - [ ] `tests/phase7/test_shipment_service.py`
+- [x] **Phase 7**: 출고 처리 서비스
+  - [x] `src/services/shipment_service.py` — ShipmentService 구현 (get_confirmed_orders(), release_order())
+  - [x] `src/views/shipment_view.py` — 출고 처리 뷰
+  - [x] `src/controllers/shipment_controller.py` — 출고 처리 컨트롤러
+  - [x] `main.py` — 출고 처리 메뉴 활성화, ShipmentController 조립
+  - [x] `dummy.py` — H-1 완전 해소 (CONFIRMED/RELEASED 경로 모두 ShipmentService.release_order() 경유 교체)
 
 - [ ] **Phase 8**: UI 및 통합 테스트
   - [ ] `src/ui/` 전체

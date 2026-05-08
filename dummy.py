@@ -10,13 +10,13 @@ import sys
 
 from faker import Faker
 
-from src.models.order import Order, OrderStatus
 from src.repositories.order_repository import OrderRepository
 from src.repositories.production_queue import ProductionQueue
 from src.repositories.sample_repository import SampleRepository
 from src.services.approval_service import ApprovalService
 from src.services.order_service import OrderService
 from src.services.sample_service import SampleService
+from src.services.shipment_service import ShipmentService
 
 fake = Faker("ko_KR")
 
@@ -49,37 +49,30 @@ def _inject(
 
     order_service = OrderService(sample_repo, order_repo)
     approval_service = ApprovalService(sample_repo, order_repo, production_queue)
+    shipment_service = ShipmentService(sample_repo, order_repo)
 
-    # RESERVED 1건: registered[0] (Si-Wafer-200)
-    order_service.place_order(registered[0].id, fake.name(), fake.random_int(min=1, max=20))
-
-    # RESERVED 1건: registered[1] (SiC-300)
+    # RESERVED 1건: registered[1] (SiC-300, stock=3)
     order_service.place_order(registered[1].id, fake.name(), fake.random_int(min=1, max=20))
+
+    # RESERVED 1건: registered[3] (InP-150, stock=8)
+    order_service.place_order(registered[3].id, fake.name(), fake.random_int(min=1, max=7))
 
     # PRODUCING 1건: registered[2] (GaAs-100, stock=0) — place_order → approve_order 경로
     producing_order = order_service.place_order(registered[2].id, fake.name(), fake.random_int(min=1, max=20))
     approval_service.approve_order(producing_order.id)
 
-    # CONFIRMED 1건: registered[3] (InP-150) — Phase 6에서 해소 예정 (H-1 유지)
-    order_id_confirmed = f"ORD-{len(order_repo.get_all()) + 1:03d}"
-    order_repo.add(Order(
-        id=order_id_confirmed,
-        sampleId=registered[3].id,
-        customerName=fake.name(),
-        quantity=fake.random_int(min=1, max=20),
-        status=OrderStatus.CONFIRMED,
-    ))
+    # CONFIRMED 1건: registered[0] (Si-Wafer-200, stock=45) — place_order → approve_order 경로
+    confirmed_order = order_service.place_order(registered[0].id, fake.name(), fake.random_int(min=1, max=10))
+    approval_service.approve_order(confirmed_order.id)
 
-    # RELEASED 2건: registered[4] (GaN-200), registered[0] (Si-Wafer-200) — Phase 7에서 해소 예정 (H-1 유지)
-    for sample in [registered[4], registered[0]]:
-        order_id_released = f"ORD-{len(order_repo.get_all()) + 1:03d}"
-        order_repo.add(Order(
-            id=order_id_released,
-            sampleId=sample.id,
-            customerName=fake.name(),
-            quantity=fake.random_int(min=1, max=20),
-            status=OrderStatus.RELEASED,
-        ))
+    # RELEASED 2건: registered[0] (Si-Wafer-200), registered[0] (Si-Wafer-200)
+    # place_order → approve_order → release_order 경로
+    for _ in range(2):
+        released_order = order_service.place_order(
+            registered[0].id, fake.name(), fake.random_int(min=1, max=5)
+        )
+        approval_service.approve_order(released_order.id)
+        shipment_service.release_order(released_order.id)
 
     total_orders = len(order_repo.get_all())
     print("  [더미 데이터 주입 완료]")
