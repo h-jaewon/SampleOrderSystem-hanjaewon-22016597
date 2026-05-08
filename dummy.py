@@ -11,7 +11,9 @@ from faker import Faker
 
 from src.models.order import Order, OrderStatus
 from src.repositories.order_repository import OrderRepository
+from src.repositories.production_queue import ProductionQueue
 from src.repositories.sample_repository import SampleRepository
+from src.services.approval_service import ApprovalService
 from src.services.order_service import OrderService
 from src.services.sample_service import SampleService
 
@@ -26,7 +28,11 @@ _SAMPLES = [
 ]
 
 
-def _inject(sample_repo: SampleRepository, order_repo: OrderRepository) -> None:
+def _inject(
+    sample_repo: SampleRepository,
+    order_repo: OrderRepository,
+    production_queue: ProductionQueue,
+) -> None:
     service = SampleService(sample_repo)
 
     registered = []
@@ -35,47 +41,44 @@ def _inject(sample_repo: SampleRepository, order_repo: OrderRepository) -> None:
         sample.stock = stock  # Phase 2 범위: SampleService에 초기재고 설정 기능 미구현으로 직접 설정 (M-1)
         registered.append(sample)
 
-    statuses = [
-        OrderStatus.RESERVED,
-        OrderStatus.RESERVED,
-        OrderStatus.PRODUCING,
-        OrderStatus.CONFIRMED,
-        OrderStatus.RELEASED,
-        OrderStatus.RELEASED,
-    ]
-
-    sample_cycle = [
-        registered[0],
-        registered[1],
-        registered[2],
-        registered[3],
-        registered[4],
-        registered[0],
-    ]
-
     order_service = OrderService(sample_repo, order_repo)
+    approval_service = ApprovalService(sample_repo, order_repo, production_queue)
 
-    for i, (status, sample) in enumerate(zip(statuses, sample_cycle), start=1):
-        customer_name = fake.name()
-        quantity = fake.random_int(min=1, max=20)
+    # RESERVED 1건: registered[0] (Si-Wafer-200)
+    order_service.place_order(registered[0].id, fake.name(), fake.random_int(min=1, max=20))
 
-        if status == OrderStatus.RESERVED:
-            order_service.place_order(sample.id, customer_name, quantity)
-        else:
-            # PRODUCING/CONFIRMED/RELEASED 상태는 Phase 4 이후 해소 예정이므로 직접 주입 유지 (H-1).
-            order_id = f"ORD-{i:03d}"
-            order = Order(
-                id=order_id,
-                sampleId=sample.id,
-                customerName=customer_name,
-                quantity=quantity,
-                status=status,
-            )
-            order_repo.add(order)
+    # RESERVED 1건: registered[1] (SiC-300)
+    order_service.place_order(registered[1].id, fake.name(), fake.random_int(min=1, max=20))
 
+    # PRODUCING 1건: registered[2] (GaAs-100, stock=0) — place_order → approve_order 경로로 교체 (H-1 부분 해소)
+    producing_order = order_service.place_order(registered[2].id, fake.name(), fake.random_int(min=1, max=20))
+    approval_service.approve_order(producing_order.id)
+
+    # CONFIRMED 1건: registered[3] (InP-150) — Phase 6에서 해소 예정 (H-1 유지)
+    order_id_confirmed = f"ORD-{len(order_repo.get_all()) + 1:03d}"
+    order_repo.add(Order(
+        id=order_id_confirmed,
+        sampleId=registered[3].id,
+        customerName=fake.name(),
+        quantity=fake.random_int(min=1, max=20),
+        status=OrderStatus.CONFIRMED,
+    ))
+
+    # RELEASED 2건: registered[4] (GaN-200), registered[0] (Si-Wafer-200) — Phase 7에서 해소 예정 (H-1 유지)
+    for sample in [registered[4], registered[0]]:
+        order_id_released = f"ORD-{len(order_repo.get_all()) + 1:03d}"
+        order_repo.add(Order(
+            id=order_id_released,
+            sampleId=sample.id,
+            customerName=fake.name(),
+            quantity=fake.random_int(min=1, max=20),
+            status=OrderStatus.RELEASED,
+        ))
+
+    total_orders = len(order_repo.get_all())
     print("  [더미 데이터 주입 완료]")
     print(f"  - 시료 {len(registered)}종 등록")
-    print(f"  - 주문 {len(statuses)}건 등록")
+    print(f"  - 주문 {total_orders}건 등록")
 
 
 def main() -> None:
@@ -83,12 +86,17 @@ def main() -> None:
 
     sample_repo = SampleRepository()
     order_repo = OrderRepository()
+    production_queue = ProductionQueue()
 
-    _inject(sample_repo, order_repo)
+    _inject(sample_repo, order_repo, production_queue)
 
     if not only:
         from main import main as run_main
-        run_main(sample_repository=sample_repo, order_repository=order_repo)
+        run_main(
+            sample_repository=sample_repo,
+            order_repository=order_repo,
+            production_queue=production_queue,
+        )
 
 
 if __name__ == "__main__":

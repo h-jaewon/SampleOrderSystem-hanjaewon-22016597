@@ -44,9 +44,15 @@
   - [x] `dummy.py` — RESERVED H-1 해소 (OrderService.place_order() 경유 교체)
   - [x] `plan/design/phase3.md` — Phase 3 설계 문서
 
-- [ ] **Phase 4**: 주문 승인/거절 서비스
-  - [ ] `src/services/approval_service.py`
-  - [ ] `tests/phase4/test_approval_service.py`
+- [x] **Phase 4**: 주문 승인/거절 서비스
+  - [x] `src/services/approval_service.py` — ApprovalService 구현 (approve_order(), reject_order())
+  - [x] `src/views/approval_view.py` — 주문 승인/거절 뷰
+  - [x] `src/controllers/approval_controller.py` — 주문 승인/거절 컨트롤러
+  - [x] `tests/phase4/__init__.py`
+  - [x] `tests/phase4/test_approval_service.py` — ApprovalService 단위 테스트 (15개, 커버리지 100%)
+  - [x] `main.py` — 주문 승인/거절 메뉴 활성화, ApprovalController 조립
+  - [x] `dummy.py` — PRODUCING H-1 해소 (ApprovalService.approve_order() 경유 교체)
+  - [x] `plan/design/phase4.md` — Phase 4 설계 문서
 
 - [ ] **Phase 5**: 모니터링 서비스
   - [ ] `src/services/monitoring_service.py`
