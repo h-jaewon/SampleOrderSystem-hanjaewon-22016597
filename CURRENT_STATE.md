@@ -6,7 +6,7 @@
 
 ## 현재 브랜치
 
-`feat/phase-4-approval-service` → PR 후 `main` merge 예정
+`feat/phase-5-monitoring-service` → PR 후 `main` merge 예정
 
 ---
 
@@ -76,7 +76,33 @@
 | `dummy.py` | 완료 (PRODUCING H-1 해소 — ApprovalService.approve_order() 경유로 교체) |
 | `plan/design/phase4.md` | 완료 |
 
-**dummy.py H-1 잔여 해소 내역:** PRODUCING 상태 주문 1건을 `ApprovalService.approve_order()` 경유 방식으로 교체 완료. CONFIRMED/RELEASED 경로는 Phase 5 이후 해소 예정으로 직접 주입 방식 유지.
+### Phase 5: 모니터링 서비스 + MVC UI 구현 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `src/services/monitoring_service.py` | 완료 (MonitoringService — get_order_summary(), get_stock_status()) |
+| `src/views/monitoring_view.py` | 완료 (모니터링 뷰) |
+| `src/controllers/monitoring_controller.py` | 완료 (모니터링 컨트롤러) |
+
+### Phase 6: 생산 라인 서비스 + MVC UI 구현 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `src/services/production_service.py` | 완료 (ProductionService — get_production_status(), complete_production()) |
+| `src/views/production_view.py` | 완료 (생산 라인 뷰) |
+| `src/controllers/production_controller.py` | 완료 (생산 라인 컨트롤러) |
+
+### Phase 7: 출고 처리 서비스 + MVC UI 구현 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `src/services/shipment_service.py` | 완료 (ShipmentService — get_confirmed_orders(), release_order()) |
+| `src/views/shipment_view.py` | 완료 (출고 처리 뷰) |
+| `src/controllers/shipment_controller.py` | 완료 (출고 처리 컨트롤러) |
+| `main.py` | 완료 (모니터링·생산·출고 메뉴 활성화, 전체 컨트롤러 조립) |
+| `dummy.py` | 완료 (H-1 완전 해소 — CONFIRMED/RELEASED 경로 모두 ShipmentService.release_order() 경유로 교체) |
+
+**dummy.py H-1 완전 해소 내역:** Phase 7 ShipmentService 구현 완료에 따라 CONFIRMED/RELEASED 경로를 `release_order()` 서비스 레이어 경유 방식으로 전환. 모든 H-1 직접 주입 코드 제거 완료.
 
 ### 테스트 결과 (SubAgent3 판정)
 
@@ -100,14 +126,10 @@ python main.py
 python dummy.py
 ```
 
-Phase 4 완료 — `ApprovalService.approve_order()` / `reject_order()` 구현 및 MVC UI(`ApprovalController`, `ApprovalView`) 연동. `python main.py` 실행 후 `(3) 주문 승인/거절` 메뉴 완전 동작. `dummy.py`의 PRODUCING H-1 해소 완료.
+Phase 5·6·7 완료 — `MonitoringService`, `ProductionService`, `ShipmentService` 구현 및 MVC UI 전체 연동. `python main.py` 실행 후 모니터링·생산·출고 메뉴 완전 동작. `dummy.py`의 H-1 이슈 완전 해소.
 
 ---
 
 ## 다음 단계
 
-**Phase 5: 모니터링 서비스** (`feat/phase-5-monitoring-service`)
-
-- `src/services/monitoring_service.py` 구현
-- `tests/phase5/test_monitoring_service.py` 작성
-- dummy.py H-1 잔여 건(CONFIRMED/RELEASED) 해소
+**Phase 8: UI 및 통합 테스트** — 전 Phase 통합 검증 및 엔드-투-엔드 테스트 작성

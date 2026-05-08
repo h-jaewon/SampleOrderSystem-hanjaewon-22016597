@@ -257,3 +257,60 @@
   - 단계적 해소 원칙(ADR-016) 준수: 각 Phase 완료 시점에 해당 Phase의 서비스 레이어 경로로 전환.
 - **H-1 잔여 항목:** CONFIRMED 1건, RELEASED 2건 — Phase 7(출고 서비스) 완료 후 해소 예정.
 - **영향 파일:** `dummy.py`
+
+---
+
+## ADR-019: MonitoringService 재고 상태 분류 — 3단계 기준
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 5
+- **결정:** `MonitoringService._classify_stock()`은 재고 상태를 "고갈"(stock == 0) / "부족"(PRODUCING 주문에 해당 시료 포함) / "여유"(그 외) 3단계로 분류한다.
+- **이유:**
+  - stock == 0은 물리적 재고 고갈로 즉시 조치가 필요하므로 최우선 판정.
+  - PRODUCING 중인 시료는 생산 중 소진 가능성이 있어 "부족" 경보 단계로 구분.
+  - 두 조건 모두 해당하지 않으면 운영 정상 범위인 "여유"로 판정.
+  - 3단계 분류는 운영자가 우선순위를 직관적으로 파악할 수 있는 최소 세분화 수준이다.
+- **대안:** 수치 임계값(예: stock < 10) 기반 분류 — PRD에 임계값 정의 없으므로 배제.
+- **영향 파일:** `src/services/monitoring_service.py`
+
+---
+
+## ADR-020: ProductionService complete_production DB 반영 — 재고 증가 + 상태 전환
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 6
+- **결정:** `ProductionService.complete_production()`은 생산 완료 시 (1) `ProductionQueue`에서 job dequeue, (2) `SampleRepository.update_stock()`으로 재고 증가(`stock + plannedQuantity`), (3) `OrderRepository.update_status()`로 주문 상태를 `PRODUCING → CONFIRMED`로 전환하는 세 단계를 원자적 순서로 수행한다.
+- **이유:**
+  - 생산 완료는 물리적 재고 증가와 주문 상태 전환이 동시에 이루어져야 시스템 일관성이 보장된다.
+  - dequeue 먼저 수행하여 중복 처리를 방지하고, 이후 재고·상태 변경을 순차 적용한다.
+  - `PRODUCING → CONFIRMED` 전환은 ADR-017의 재고 차감 보류 원칙과 대칭: 생산 완료(재고 증가)는 즉시 반영, 출고(재고 차감)는 ShipmentService에 위임.
+- **대안:** 재고 증가 없이 상태만 전환 — 시료 재고 실수와 주문 상태의 불일치 발생으로 배제.
+- **영향 파일:** `src/services/production_service.py`
+
+---
+
+## ADR-021: ShipmentService release_order 출고 시 재고 차감
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 7
+- **결정:** `ShipmentService.release_order()`는 CONFIRMED 주문 출고 시 `SampleRepository.update_stock()`으로 `stock - order.quantity`를 즉시 반영하고 주문 상태를 `CONFIRMED → RELEASED`로 전환한다.
+- **이유:**
+  - ADR-017에서 결정된 "재고 차감은 출고 시점" 원칙의 구현 완결.
+  - 출고 전 CONFIRMED 상태 검증(`order.status != OrderStatus.CONFIRMED → ValueError`)으로 이중 출고 방지.
+  - 재고가 주문 수량보다 부족한 경우에 대한 별도 가드는 PRD 범위 외이므로 미적용(운영 정책 영역).
+- **상태 전환:** `CONFIRMED → RELEASED`
+- **영향 파일:** `src/services/shipment_service.py`
+
+---
+
+## ADR-022: dummy.py H-1 완전 해소 — Phase 7 완료 시점
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 7
+- **결정:** Phase 7 `ShipmentService` 구현 완료에 따라 `dummy.py`의 CONFIRMED/RELEASED 직접 주입 코드를 모두 `place_order → approve_order → release_order` 서비스 레이어 경유 방식으로 교체하여 H-1 이슈를 완전 해소한다.
+- **이유:**
+  - ADR-016·ADR-018의 단계적 해소 원칙에 따른 최종 완료 단계.
+  - `ShipmentService.release_order()`가 Phase 7에서 구현되므로 CONFIRMED/RELEASED 경로를 정상 서비스 레이어로 전환 가능.
+  - 직접 주입 코드(`# H-1`) 완전 제거로 `dummy.py`가 실제 사용자 시나리오와 동일한 경로를 검증하는 통합 시연 스크립트로 완성.
+- **H-1 잔여 항목:** 없음 (완전 해소)
+- **영향 파일:** `dummy.py`
