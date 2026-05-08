@@ -148,3 +148,46 @@
   - 안내 메시지(`시스템을 종료합니다.`)를 출력하고 종료함으로써 CLI 사용성 개선.
   - SubAgent4 High-01 이슈 수정 결과로 확정.
 - **영향 파일:** `main.py`
+
+---
+
+## ADR-012: MVC 패턴 도입 — `src/ui/` → `src/views/` + `src/controllers/`
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 MVC 리팩터링
+- **결정:** 기존 `src/ui/` 패키지를 MVC 패턴에 따라 `src/views/`(화면 출력 담당)와 `src/controllers/`(비즈니스 흐름 제어 담당)로 분리한다.
+- **이유:**
+  - mvc-poc 브랜치에서 검증된 패턴을 본 브랜치에 적용하여 관심사 분리(SoC) 강화.
+  - 뷰(View)는 출력만, 컨트롤러(Controller)는 서비스 호출 및 흐름 제어만 담당 — 단일 책임 원칙(SRP) 준수.
+  - Phase 3 이후 주문·승인·모니터링 메뉴 추가 시 각 도메인별 controller/view 파일을 독립적으로 확장 가능.
+- **대안:** `src/ui/` 구조 유지 — 뷰·컨트롤러 역할 혼재로 향후 유지보수 복잡도 증가 우려로 배제.
+- **영향 파일:** `src/views/__init__.py`, `src/views/display.py`, `src/views/sample_view.py`, `src/controllers/__init__.py`, `src/controllers/sample_controller.py`, `main.py`
+- **제거 파일:** `src/ui/__init__.py`, `src/ui/display.py`, `src/ui/sample_menu.py`
+
+---
+
+## ADR-013: 모니터링 뷰 유니코드 테이블 — `rich` 라이브러리 활용
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 MVC 리팩터링 (monitor-poc 참고)
+- **결정:** 향후 모니터링 뷰(`src/views/monitoring_view.py`)에서 유니코드 테이블 출력이 필요할 경우 `rich` 라이브러리를 사용한다.
+- **이유:**
+  - monitor-poc 브랜치에서 검증된 유니코드 테이블 렌더링 품질이 CLI 사용성을 크게 개선.
+  - `rich.table.Table`은 컬럼 정렬, 색상, 테두리 스타일 등을 선언적으로 설정 가능.
+  - `requirements.txt`에 `rich` 패키지 버전 고정 추가 예정.
+- **대안:** 순수 Python f-string 정렬 — 한글 가변 폭 문자로 인한 정렬 오류 발생 위험으로 배제.
+- **영향 파일:** `requirements.txt`, `src/views/monitoring_view.py` (Phase 5 이후 생성 예정)
+
+---
+
+## ADR-014: Faker Korean 더미 데이터 생성기 — `dummy.py`
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 MVC 리팩터링
+- **결정:** `Faker('ko_KR')` 로케일을 사용하는 `dummy.py` 스크립트를 프로젝트 루트에 추가하여 개발·테스트용 한국어 더미 데이터를 생성한다.
+- **이유:**
+  - 시료 이름, 담당자 등 한국어 필드가 다수 포함된 도메인 특성상 Korean 로케일 Faker가 현실적인 테스트 데이터 제공.
+  - `dummy.py`를 독립 스크립트로 분리하여 실제 서비스 코드와 테스트 코드에 영향 없이 실행 가능.
+  - SubAgent3 판정에서 `dummy.py` 정상 동작 확인.
+- **대안:** 고정 문자열 하드코딩 — 다양한 입력값 검증 부족으로 배제.
+- **영향 파일:** `dummy.py`, `requirements.txt` (`faker` 패키지 버전 고정)
