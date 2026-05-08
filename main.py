@@ -1,9 +1,13 @@
+from src.controllers.approval_controller import ApprovalController
 from src.controllers.order_controller import OrderController
 from src.controllers.sample_controller import SampleController
 from src.repositories.order_repository import OrderRepository
+from src.repositories.production_queue import ProductionQueue
 from src.repositories.sample_repository import SampleRepository
+from src.services.approval_service import ApprovalService
 from src.services.order_service import OrderService
 from src.services.sample_service import SampleService
+from src.views.approval_view import ApprovalView
 from src.views.display import input_prompt, print_error
 from src.views.order_view import OrderView
 from src.views.sample_view import SampleView
@@ -15,7 +19,7 @@ def _print_main_menu() -> None:
     print("+======================================================+")
     print("|  (1) 시료 관리                                       |")
     print("|  (2) 시료 주문                                       |")
-    print("|  (3) 주문 승인 / 거절    (준비 중)                   |")
+    print("|  (3) 주문 승인 / 거절                                |")
     print("|  (4) 모니터링            (준비 중)                   |")
     print("|  (5) 생산 라인 조회      (준비 중)                   |")
     print("|  (6) 출고 처리           (준비 중)                   |")
@@ -26,11 +30,14 @@ def _print_main_menu() -> None:
 def main(
     sample_repository: SampleRepository | None = None,
     order_repository: OrderRepository | None = None,
+    production_queue: ProductionQueue | None = None,
 ) -> None:
     if sample_repository is None:
         sample_repository = SampleRepository()
     if order_repository is None:
         order_repository = OrderRepository()
+    if production_queue is None:
+        production_queue = ProductionQueue()
 
     sample_service = SampleService(sample_repository)
     sample_view = SampleView()
@@ -40,6 +47,10 @@ def main(
     order_view = OrderView()
     order_controller = OrderController(order_service, order_view)
 
+    approval_service = ApprovalService(sample_repository, order_repository, production_queue)
+    approval_view = ApprovalView()
+    approval_controller = ApprovalController(approval_service, approval_view, order_repository)
+
     while True:
         _print_main_menu()
         choice = input_prompt("선택")
@@ -48,7 +59,9 @@ def main(
             sample_controller.run()
         elif choice == "2":
             order_controller.run()
-        elif choice in ("3", "4", "5", "6"):
+        elif choice == "3":
+            approval_controller.run()
+        elif choice in ("4", "5", "6"):
             print("\n  아직 준비 중인 기능입니다.")
         elif choice == "0":
             print("\n  시스템을 종료합니다.")

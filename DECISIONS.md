@@ -229,3 +229,31 @@
 - **H-1 잔여 항목:** PRODUCING 1건, CONFIRMED 1건, RELEASED 2건 — Phase 4 완료 후 해소 예정.
 - **코드 명시:** 직접 주입이 남아 있는 코드 블록에 `# PRODUCING/CONFIRMED/RELEASED 상태는 Phase 4 이후 해소 예정이므로 직접 주입 유지 (H-1).` 주석 유지.
 - **영향 파일:** `dummy.py`
+
+---
+
+## ADR-017: approve_order 재고 차감 금지 — 출고 시점 보류
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 4
+- **결정:** `ApprovalService.approve_order()`는 주문 승인 시 재고를 차감하지 않는다. 재고 차감은 출고(Phase 7 ShipmentService) 시점까지 보류한다.
+- **이유:**
+  - 주문 승인은 "생산 진행 동의"를 의미하며, 물리적 재고 이동은 실제 출고 시점에 발생한다.
+  - 승인 단계에서 재고를 선차감하면, 출고 취소/반려 발생 시 재고 복원 로직이 복잡해진다.
+  - 단계별 책임 분리(SRP): 승인 서비스는 상태 전환(RESERVED → CONFIRMED)만 담당하고, 재고 관리는 출고 서비스에 위임한다.
+- **상태 전환:** `RESERVED` → `CONFIRMED` (approve_order), `RESERVED` → `REJECTED`(reject_order, 신규 상태)
+- **영향 파일:** `src/services/approval_service.py`
+
+---
+
+## ADR-018: dummy.py H-1 단계적 해소 — PRODUCING 경로 완료
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 4
+- **결정:** Phase 4에서 `dummy.py`의 PRODUCING 상태 주문 1건을 `ApprovalService.approve_order()` 경유 방식으로 교체 완료한다. CONFIRMED/RELEASED 2건(+추가분)은 Phase 5 이후 해소 예정으로 직접 주입 유지.
+- **이유:**
+  - PRODUCING 상태는 `ApprovalService.approve_order()` → `OrderStatus.CONFIRMED` 전환 후 `ProductionQueue` 진입 경로로 Phase 4에서 구현되므로 즉시 교체 가능하다.
+  - CONFIRMED/RELEASED 상태는 Phase 5(모니터링) 이후 출고 서비스(Phase 7)까지 연계가 필요하므로 현 Phase에서 서비스 레이어 경유 교체가 불가능하다.
+  - 단계적 해소 원칙(ADR-016) 준수: 각 Phase 완료 시점에 해당 Phase의 서비스 레이어 경로로 전환.
+- **H-1 잔여 항목:** CONFIRMED 1건, RELEASED 2건 — Phase 7(출고 서비스) 완료 후 해소 예정.
+- **영향 파일:** `dummy.py`
