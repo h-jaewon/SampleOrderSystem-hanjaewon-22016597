@@ -17,10 +17,12 @@
   - [x] `plan/design/phase1.md` — Phase 1 설계 문서
   - [x] `pytest.ini`, `requirements.txt` 설정
 
-- [ ] **Phase 2**: 시료 관리 서비스
-  - [ ] `src/services/__init__.py`
-  - [ ] `src/services/sample_service.py` — SampleService 구현
-  - [ ] `tests/phase2/test_sample_service.py` — SampleService 단위 테스트
+- [x] **Phase 2**: 시료 관리 서비스
+  - [x] `src/services/__init__.py`
+  - [x] `src/services/sample_service.py` — SampleService 구현
+  - [x] `tests/phase2/__init__.py`
+  - [x] `tests/phase2/test_sample_service.py` — SampleService 단위 테스트 (17개, 커버리지 100%)
+  - [x] `plan/design/phase2.md` — Phase 2 설계 문서
 
 - [ ] **Phase 3**: 주문 접수 서비스
   - [ ] `src/services/order_service.py`
