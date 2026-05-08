@@ -107,3 +107,44 @@
 - **형식:** `S{순번:03d}` — 예) `S001`, `S002`, `S999`
 - **제약:** 시료 삭제 기능이 추가될 경우 이 전략을 재검토해야 한다.
 - **영향 파일:** `src/services/sample_service.py`
+
+---
+
+## ADR-009: UI 공통 유틸 분리 — `display.py` 단일 모듈
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 UI
+- **결정:** 출력/입력 관련 모든 공통 함수(`print_header`, `print_divider`, `print_success`, `print_error`, `input_prompt`, `pause`)를 `src/ui/display.py` 한 모듈에 집중시킨다.
+- **이유:**
+  - 각 메뉴 모듈(`sample_menu.py` 등)이 동일한 스타일의 출력을 재사용할 수 있어 일관된 UI 보장.
+  - 향후 출력 형식 변경 시 `display.py` 한 곳만 수정하면 전체 UI에 반영 가능(단일 변경점 원칙).
+  - `DIVIDER` 상수를 모듈 수준에서 정의하여 길이 변경도 한 곳에서 관리.
+- **대안:** 각 메뉴 파일 내 인라인 출력 — 중복 코드 증가 및 스타일 불일치 위험으로 배제.
+- **영향 파일:** `src/ui/display.py`, `src/ui/sample_menu.py`, `main.py`
+
+---
+
+## ADR-010: `pause()` 메시지 파라미터화
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 UI
+- **결정:** `display.pause()` 함수의 안내 메시지를 하드코딩하지 않고, `message: str = "이전 메뉴로 돌아갑니다"` 파라미터로 받는다.
+- **이유:**
+  - 호출 맥락에 따라 "이전 메뉴로 돌아갑니다", "계속하려면 엔터를 누르세요" 등 다양한 메시지가 필요.
+  - 기본값 제공으로 대부분의 호출 지점에서 인자 생략 가능 — 하위 호환성 유지.
+  - SubAgent4 High-01 이슈 수정 결과로 확정.
+- **형식:** `input(f"\n  엔터를 누르면 {message}.")`
+- **영향 파일:** `src/ui/display.py`
+
+---
+
+## ADR-011: 메인 진입점 KeyboardInterrupt 처리
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2 UI
+- **결정:** `main.py`의 `if __name__ == "__main__"` 블록에서 `main()` 호출을 `try/except KeyboardInterrupt`로 감싸 Ctrl+C 입력 시 안내 메시지를 출력하고 정상 종료한다.
+- **이유:**
+  - Ctrl+C를 누르면 Python 기본 동작으로 `KeyboardInterrupt` 스택 트레이스가 터미널에 출력되어 사용자 혼란 유발.
+  - 안내 메시지(`시스템을 종료합니다.`)를 출력하고 종료함으로써 CLI 사용성 개선.
+  - SubAgent4 High-01 이슈 수정 결과로 확정.
+- **영향 파일:** `main.py`
