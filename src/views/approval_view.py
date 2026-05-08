@@ -4,7 +4,6 @@ from src.views.display import (
     colorize,
     pause,
     print_divider,
-    print_error,
     print_header,
     print_success,
     print_table,
@@ -60,5 +59,3 @@ class ApprovalView:
         print(f"    상태      : {colorize(order.status.value, Color.RED)}")
         pause()
 
-    def render_error(self, message: str) -> None:
-        print_error(message)

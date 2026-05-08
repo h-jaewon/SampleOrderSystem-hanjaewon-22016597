@@ -5,7 +5,6 @@ from src.views.display import (
     colorize,
     pause,
     print_divider,
-    print_error,
     print_header,
     print_success,
     print_table,
@@ -49,5 +48,3 @@ class ShipmentView:
         print("\n  출고 대기 중인 주문이 없습니다.")
         pause()
 
-    def render_error(self, message: str) -> None:
-        print_error(message)

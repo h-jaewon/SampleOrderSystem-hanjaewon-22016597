@@ -1,6 +1,8 @@
 import math
 
 from src.models.order import Order, OrderStatus
+
+_PRODUCTION_SAFETY_FACTOR = 0.9  # 수율의 90%만 유효 생산으로 간주하는 안전계수 (PRD 5.6)
 from src.models.production_job import ProductionJob
 from src.repositories.order_repository import OrderRepository
 from src.repositories.production_queue import ProductionQueue
@@ -17,6 +19,9 @@ class ApprovalService:
         self._sample_repository = sample_repository
         self._order_repository = order_repository
         self._production_queue = production_queue
+
+    def get_reserved_orders(self) -> list[Order]:
+        return self._order_repository.get_by_status(OrderStatus.RESERVED)
 
     def approve_order(self, order_id: str) -> Order:
         order = self._order_repository.get(order_id)
@@ -58,4 +63,4 @@ class ApprovalService:
         return order
 
     def _calculate_production_quantity(self, deficit: int, yield_: float) -> int:
-        return math.ceil(deficit / (yield_ * 0.9))
+        return math.ceil(deficit / (yield_ * _PRODUCTION_SAFETY_FACTOR))

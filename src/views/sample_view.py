@@ -3,7 +3,6 @@ from src.views.display import (
     ljust_v,
     pause,
     print_divider,
-    print_error,
     print_header,
     print_success,
     print_table,
@@ -47,9 +46,6 @@ class SampleView:
     def render_empty(self) -> None:
         print("  등록된 시료가 없습니다.")
         pause()
-
-    def render_error(self, message: str) -> None:
-        print_error(message)
 
     def _print_sample_table(self, samples: list[Sample]) -> None:
         rows = []

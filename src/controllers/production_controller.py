@@ -46,15 +46,17 @@ class ProductionController:
             return
 
         job = current["job"]
+        current_sample = samples_map.get(job.sampleId)
+        stock_before = current_sample.stock if current_sample else 0
 
         try:
             order = self._service.complete_production()
         except ValueError as e:
-            self._view.render_error(str(e))
+            print_error(str(e))
             return
 
         # 완료 후 갱신된 시료 정보로 재고 변동 표시
         samples = self._sample_service.get_all_samples()
         updated_map = {s.id: s for s in samples}
         sample = updated_map.get(order.sampleId)
-        self._view.render_completed(order, job, sample)
+        self._view.render_completed(order, job, sample, stock_before)

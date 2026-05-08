@@ -1,5 +1,5 @@
 from src.models.order import Order
-from src.views.display import pause, print_divider, print_error, print_success
+from src.views.display import pause, print_divider, print_success
 
 
 class OrderView:
@@ -14,5 +14,3 @@ class OrderView:
         print(f"    상태      : {order.status.value}")
         pause()
 
-    def render_error(self, message: str) -> None:
-        print_error(message)

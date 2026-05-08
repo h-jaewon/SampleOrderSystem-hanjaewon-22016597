@@ -73,6 +73,13 @@
   - [x] `main.py` — 출고 처리 메뉴 활성화, ShipmentController 조립
   - [x] `dummy.py` — H-1 완전 해소 (CONFIRMED/RELEASED 경로 모두 ShipmentService.release_order() 경유 교체)
 
-- [ ] **Phase 8**: UI 및 통합 테스트
-  - [ ] `src/ui/` 전체
-  - [ ] `tests/phase8/test_integration.py`
+- [x] **Phase 8**: UI 및 통합 테스트
+  - [x] `tests/phase8/__init__.py`
+  - [x] `tests/phase8/test_integration.py` — 전체 시스템 통합 테스트 (37개, Phase 5~7 포함 E2E 검증)
+  - [x] Phase 5~7 서비스 레이어 통합 검증 (Phase 8 일괄 검증 전략, ADR-023)
+
+---
+
+## 전체 완료
+
+모든 Phase(1~8) 구현 및 검증 완료. 누적 테스트 102개 전원 통과.

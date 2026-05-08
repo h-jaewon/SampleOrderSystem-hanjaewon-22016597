@@ -6,7 +6,6 @@ from src.views.display import (
     colorize,
     pause,
     print_divider,
-    print_error,
     print_header,
     print_success,
     print_table,
@@ -59,14 +58,13 @@ class ProductionView:
                 ])
             print_table(headers2, rows2, col_widths2)
 
-    def render_completed(self, order: Order, job: ProductionJob, sample: Sample) -> None:
+    def render_completed(self, order: Order, job: ProductionJob, sample: Sample, stock_before: int) -> None:
         print()
         print_divider()
         print_success("생산이 완료되었습니다. (PRODUCING → CONFIRMED)")
         print(f"    주문 ID   : {order.id}")
         print(f"    시료명    : {sample.name}")
         print(f"    주문 수량 : {order.quantity} 개")
-        stock_before = sample.stock - job.plannedQuantity
         print(f"    재고 변동 : {stock_before} 개 → {sample.stock} 개 (+{job.plannedQuantity})")
         print(f"    상태      : {colorize('PRODUCING', Color.YELLOW)} → {colorize(order.status.value, Color.GREEN)}")
         pause()
@@ -75,5 +73,3 @@ class ProductionView:
         print("\n  진행 중인 생산 작업이 없습니다.")
         pause()
 
-    def render_error(self, message: str) -> None:
-        print_error(message)
