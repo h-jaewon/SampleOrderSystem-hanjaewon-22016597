@@ -9,18 +9,18 @@ from src.services.approval_service import ApprovalService
 
 
 @pytest.fixture
-def sample_repo():
-    return SampleRepository()
+def sample_repo(db_path):
+    return SampleRepository(db_path=db_path)
 
 
 @pytest.fixture
-def order_repo():
-    return OrderRepository()
+def order_repo(db_path):
+    return OrderRepository(db_path=db_path)
 
 
 @pytest.fixture
-def production_queue():
-    return ProductionQueue()
+def production_queue(db_path):
+    return ProductionQueue(db_path=db_path)
 
 
 @pytest.fixture

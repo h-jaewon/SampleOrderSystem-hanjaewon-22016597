@@ -3,6 +3,7 @@
 사용법:
     python dummy.py          # 더미 데이터 주입 후 main.py 자동 시작
     python dummy.py --only   # 더미 주입만 (main.py 실행 안 함)
+    python dummy.py --reset  # 기존 데이터 초기화 후 재주입 (+ main.py 자동 시작)
 """
 
 import sys
@@ -33,12 +34,17 @@ def _inject(
     order_repo: OrderRepository,
     production_queue: ProductionQueue,
 ) -> None:
+    if sample_repo.get_all():
+        print("  [정보] 이미 데이터가 존재합니다.")
+        print("  재주입하려면: python dummy.py --reset")
+        return
+
     service = SampleService(sample_repo)
 
     registered = []
     for name, avg_time, yield_, stock in _SAMPLES:
         sample = service.register_sample(name, avg_time, yield_)
-        sample.stock = stock  # Phase 2 범위: SampleService에 초기재고 설정 기능 미구현으로 직접 설정 (M-1)
+        sample_repo.update_stock(sample.id, stock)
         registered.append(sample)
 
     order_service = OrderService(sample_repo, order_repo)
@@ -50,7 +56,7 @@ def _inject(
     # RESERVED 1건: registered[1] (SiC-300)
     order_service.place_order(registered[1].id, fake.name(), fake.random_int(min=1, max=20))
 
-    # PRODUCING 1건: registered[2] (GaAs-100, stock=0) — place_order → approve_order 경로로 교체 (H-1 부분 해소)
+    # PRODUCING 1건: registered[2] (GaAs-100, stock=0) — place_order → approve_order 경로
     producing_order = order_service.place_order(registered[2].id, fake.name(), fake.random_int(min=1, max=20))
     approval_service.approve_order(producing_order.id)
 
@@ -82,7 +88,17 @@ def _inject(
 
 
 def main() -> None:
+    reset = "--reset" in sys.argv
     only = "--only" in sys.argv
+
+    if reset:
+        import src.database as _db
+        from src.database import get_connection
+        with get_connection(_db.DB_PATH) as conn:
+            conn.execute("DELETE FROM production_queue")
+            conn.execute("DELETE FROM orders")
+            conn.execute("DELETE FROM samples")
+        print("  [초기화 완료] 기존 데이터가 삭제되었습니다.")
 
     sample_repo = SampleRepository()
     order_repo = OrderRepository()

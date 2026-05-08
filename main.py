@@ -1,6 +1,8 @@
+import src.database as _database
 from src.controllers.approval_controller import ApprovalController
 from src.controllers.order_controller import OrderController
 from src.controllers.sample_controller import SampleController
+from src.database import init_db
 from src.repositories.order_repository import OrderRepository
 from src.repositories.production_queue import ProductionQueue
 from src.repositories.sample_repository import SampleRepository
@@ -32,6 +34,7 @@ def main(
     order_repository: OrderRepository | None = None,
     production_queue: ProductionQueue | None = None,
 ) -> None:
+    init_db(_database.DB_PATH)
     if sample_repository is None:
         sample_repository = SampleRepository()
     if order_repository is None:
