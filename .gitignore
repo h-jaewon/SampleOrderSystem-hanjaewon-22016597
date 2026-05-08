@@ -17,3 +17,7 @@ target/
 *.class
 *.pyc
 __pycache__/
+
+# Test coverage artifacts
+.coverage
+.pytest_cache/

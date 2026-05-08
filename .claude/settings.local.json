@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem -Path \"C:\\\\reviewer\\\\project\\\\sampleordersystem\" -Force -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\reviewer\\\\project\\\\sampleordersystem\" -Force -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\reviewer\\\\project\\\\sampleordersystem\\\\src\\\\models\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\reviewer\\\\project\\\\sampleordersystem\\\\src\\\\repositories\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\reviewer\\\\project\\\\sampleordersystem\\\\tests\\\\phase1\")",
+      "Bash(Write-Host \"Directories created\")",
+      "PowerShell(New-Item *)",
+      "Bash(pip install *)",
+      "Bash(pytest tests/phase1/ -v --cov=src --cov-report=term-missing)",
+      "Bash(pip index *)",
+      "Bash(git check-ignore *)",
+      "Bash(git add *)"
     ]
   }
 }
