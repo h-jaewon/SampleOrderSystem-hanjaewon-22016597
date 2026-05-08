@@ -1,0 +1,19 @@
+# MCP 설정 (GitHub 토큰 포함 — 절대 커밋 금지)
+.mcp.json
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+bin/
+out/
+target/
+*.class
+*.pyc
+__pycache__/
