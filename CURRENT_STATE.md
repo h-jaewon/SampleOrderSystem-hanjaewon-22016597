@@ -6,7 +6,7 @@
 
 ## 현재 브랜치
 
-`feat/phase-5-monitoring-service` → PR 후 `main` merge 예정
+`feat/phase-8-integration` → PR 후 `main` merge 예정
 
 ---
 
@@ -104,6 +104,21 @@
 
 **dummy.py H-1 완전 해소 내역:** Phase 7 ShipmentService 구현 완료에 따라 CONFIRMED/RELEASED 경로를 `release_order()` 서비스 레이어 경유 방식으로 전환. 모든 H-1 직접 주입 코드 제거 완료.
 
+### Phase 8: UI 및 통합 테스트 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `tests/phase8/__init__.py` | 완료 |
+| `tests/phase8/test_integration.py` | 완료 (37개 통합 테스트 — 시나리오 A/B/C, 모니터링, 예외 처리, 생산 엣지케이스) |
+
+**통합 테스트 범위:**
+- 시나리오 A (11개): 재고 부족 경로 — RESERVED → PRODUCING → CONFIRMED → RELEASED 전 흐름
+- 시나리오 B (6개): 재고 충분 경로 — RESERVED → CONFIRMED → RELEASED 전 흐름
+- 시나리오 C (4개): 거절 경로 — RESERVED → REJECTED
+- 모니터링 (7개): 상태별 집계(MN-01~MN-04), 재고 상태 분류(여유/부족/고갈)
+- 예외 처리 (12개): 미등록 시료, 잘못된 상태 출고, 입력값 유효성 등 전 경계값
+- 생산 엣지케이스 (4개): 빈 큐 ValueError, FIFO 순서, 상태 조회
+
 ### 테스트 결과 (SubAgent3 판정)
 
 - 판정: **PASS**
@@ -111,7 +126,8 @@
 - Phase 2: 17개 테스트 전원 통과, `src/services/sample_service.py` 커버리지 100%
 - Phase 3: 11개 테스트 전원 통과, `src/services/order_service.py` 커버리지 100%
 - Phase 4: 15개 테스트 전원 통과, `src/services/approval_service.py` 커버리지 100%
-- 누적 테스트: 65개 전원 통과
+- Phase 8: 37개 통합 테스트 전원 통과 (Phase 5~7 포함 전체 시스템 검증)
+- 누적 테스트: 102개 전원 통과
 
 ### 컴플라이언스 결과 (SubAgent4 판정)
 
@@ -124,12 +140,13 @@
 ```
 python main.py
 python dummy.py
+pytest tests/phase8/test_integration.py -v
 ```
 
-Phase 5·6·7 완료 — `MonitoringService`, `ProductionService`, `ShipmentService` 구현 및 MVC UI 전체 연동. `python main.py` 실행 후 모니터링·생산·출고 메뉴 완전 동작. `dummy.py`의 H-1 이슈 완전 해소.
+전체 시스템 구현 완료 — Phase 1~8 모든 기능 구현 및 검증 완료. Phase 8 통합 테스트 37개로 전체 서비스 레이어 E2E 흐름, Phase 5~7(모니터링·생산·출고) 포함 전 시나리오 검증 완료.
 
 ---
 
 ## 다음 단계
 
-**Phase 8: UI 및 통합 테스트** — 전 Phase 통합 검증 및 엔드-투-엔드 테스트 작성
+**구현 완료** — 전체 Phase(1~8) 구현 및 통합 테스트 검증 완료. PR 생성 후 `main` merge 예정.

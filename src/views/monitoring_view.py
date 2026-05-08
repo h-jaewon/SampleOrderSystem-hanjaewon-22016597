@@ -14,13 +14,6 @@ _STATUS_COLORS = {
     OrderStatus.RELEASED.value: Color.CYAN,
 }
 
-_MONITORED_STATUSES = [
-    OrderStatus.RESERVED.value,
-    OrderStatus.PRODUCING.value,
-    OrderStatus.CONFIRMED.value,
-    OrderStatus.RELEASED.value,
-]
-
 _STOCK_COLORS = {
     "여유": Color.GREEN,
     "부족": Color.YELLOW,
@@ -39,11 +32,11 @@ class MonitoringView:
         col_widths = [12, 6]
         rows = [
             [colorize(status, _STATUS_COLORS.get(status, "")), str(counts[status])]
-            for status in _MONITORED_STATUSES
+            for status in _STATUS_COLORS
         ]
         print_table(headers, rows, col_widths)
 
-        for status in _MONITORED_STATUSES:
+        for status in _STATUS_COLORS:
             status_orders = orders[status]
             if not status_orders:
                 continue

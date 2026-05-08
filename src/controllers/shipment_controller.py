@@ -44,11 +44,10 @@ class ShipmentController:
         while True:
             order_id = input_prompt("주문 ID        ")
             if not order_id:
-                self._view.render_error("주문 ID를 입력해 주세요.")
+                print_error("주문 ID를 입력해 주세요.")
                 continue
 
             try:
-                sample = samples_map.get(order_id)
                 # 출고 전 재고를 확인하기 위해 확정 주문 목록에서 해당 주문의 시료 재고를 읽음
                 confirmed = {o.id: o for o in self._service.get_confirmed_orders()}
                 target_order = confirmed.get(order_id)
@@ -67,5 +66,5 @@ class ShipmentController:
                 self._view.render_released(order, released_sample, stock_before)
                 break
             except ValueError as e:
-                self._view.render_error(str(e))
+                print_error(str(e))
                 continue

@@ -38,28 +38,28 @@ class SampleController:
         while True:
             name = input_prompt("시료 이름       ")
             if not name:
-                self._view.render_error("시료 이름은 필수 입력값입니다.")
+                print_error("시료 이름은 필수 입력값입니다.")
                 continue
 
             try:
                 avg_time_raw = input_prompt("평균 생산시간(h)")
                 avg_production_time = float(avg_time_raw)
             except ValueError:
-                self._view.render_error("평균 생산시간은 숫자로 입력해 주세요.")
+                print_error("평균 생산시간은 숫자로 입력해 주세요.")
                 continue
 
             try:
                 yield_raw = input_prompt("수율 (0~1)     ")
                 yield_ = float(yield_raw)
             except ValueError:
-                self._view.render_error("수율은 숫자로 입력해 주세요.")
+                print_error("수율은 숫자로 입력해 주세요.")
                 continue
 
             try:
                 sample = self._service.register_sample(name, avg_production_time, yield_)
                 break
             except ValueError as e:
-                self._view.render_error(str(e))
+                print_error(str(e))
 
         self._view.render_registered(sample)
 

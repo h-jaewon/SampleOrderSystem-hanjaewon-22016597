@@ -70,7 +70,7 @@ def main(
 
     approval_service = ApprovalService(sample_repository, order_repository, production_queue)
     approval_view = ApprovalView()
-    approval_controller = ApprovalController(approval_service, approval_view, order_repository)
+    approval_controller = ApprovalController(approval_service, approval_view)
 
     monitoring_service = MonitoringService(sample_repository, order_repository)
     monitoring_view = MonitoringView()
