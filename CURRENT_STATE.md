@@ -6,7 +6,7 @@
 
 ## 현재 브랜치
 
-`feat/phase-2-mvc-refactor` → PR 후 `main` merge 예정
+`feat/phase-3-order-service` → PR 후 `main` merge 예정
 
 ---
 
@@ -44,26 +44,38 @@
 | `src/views/sample_view.py` | 완료 (시료 관리 뷰) |
 | `src/controllers/__init__.py` | 완료 (MVC 리팩터링 — 컨트롤러 패키지) |
 | `src/controllers/sample_controller.py` | 완료 (시료 관리 컨트롤러) |
-| `main.py` | 완료 (MVC 진입점으로 갱신) |
-| `dummy.py` | 완료 (Faker Korean 더미 데이터 생성기 추가) |
 | ~~`src/ui/__init__.py`~~ | 삭제 (MVC 리팩터링으로 제거) |
 | ~~`src/ui/display.py`~~ | 삭제 (MVC 리팩터링으로 제거) |
 | ~~`src/ui/sample_menu.py`~~ | 삭제 (MVC 리팩터링으로 제거) |
+
+### Phase 3: 시료 주문 서비스 + MVC UI 구현 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `src/services/order_service.py` | 완료 (OrderService — place_order()) |
+| `src/views/order_view.py` | 완료 (주문 접수 뷰) |
+| `src/controllers/order_controller.py` | 완료 (주문 접수 컨트롤러) |
+| `tests/phase3/__init__.py` | 완료 |
+| `tests/phase3/test_order_service.py` | 완료 (11개 테스트) |
+| `main.py` | 완료 (시료 주문 메뉴 활성화, OrderController 조립) |
+| `dummy.py` | 완료 (RESERVED H-1 해소 — OrderService.place_order() 경유로 교체) |
+| `plan/design/phase3.md` | 완료 |
+
+**dummy.py H-1 해소 내역:** RESERVED 상태 주문 2건을 기존 `OrderRepository.add()` 직접 호출 방식에서 `OrderService.place_order()` 경유 방식으로 교체 완료. 나머지 PRODUCING/CONFIRMED/RELEASED 4건은 Phase 4 이후 해소 예정으로 직접 주입 방식 유지(해당 코드에 주석 명시).
 
 ### 테스트 결과 (SubAgent3 판정)
 
 - 판정: **PASS**
 - Phase 1: 22개 테스트 전원 통과, 커버리지 99%
 - Phase 2: 17개 테스트 전원 통과, `src/services/sample_service.py` 커버리지 100%
-- 누적 테스트: 39개 전원 통과
-- MVC import 검증: `src/views`, `src/controllers` 정상 동작 확인
-- `dummy.py` 실행 검증: 정상 동작 확인
+- Phase 3: 11개 테스트 전원 통과, `src/services/order_service.py` 커버리지 100%
+- 누적 테스트: 50개 전원 통과
 
 ### 컴플라이언스 결과 (SubAgent4 판정)
 
 - 판정: **PASS**
 - Critical: 0건
-- High: 1건 (주석으로 명시 완료 — M-2 `requirements.txt` 버전 고정 즉시 수정 완료)
+- High: 1건 (known issue — Phase 4에서 해소 예정, 주석으로 명시 완료)
 
 ### 실행 방법
 
@@ -72,16 +84,14 @@ python main.py
 python dummy.py
 ```
 
-Phase 2 MVC 리팩터링 완료 — `src/ui/` → `src/views/` + `src/controllers/` 구조로 전환. `python main.py` 실행 가능. 시료 관리(등록/조회/검색) 메뉴 완전 동작.
+Phase 3 완료 — `OrderService.place_order()` 구현 및 MVC UI(`OrderController`, `OrderView`) 연동. `python main.py` 실행 후 `(2) 시료 주문` 메뉴 완전 동작. `dummy.py`의 RESERVED H-1 해소 완료.
 
 ---
 
 ## 다음 단계
 
-**Phase 3: 주문 접수 서비스** (`feat/phase-3-order-service`)
+**Phase 4: 주문 승인 / 거절 서비스** (`feat/phase-4-approval-service`)
 
-- `src/services/order_service.py` 구현
-- `tests/phase3/test_order_service.py` 작성
-- `src/controllers/order_controller.py` 구현 (주문 접수 컨트롤러)
-- `src/views/order_view.py` 구현 (주문 접수 뷰)
-- OrderService: `place_order()`, `get_order()`, `get_all_orders()`, `get_orders_by_status()`
+- `src/services/approval_service.py` 구현
+- `tests/phase4/test_approval_service.py` 작성
+- dummy.py H-1 잔여 건(PRODUCING/CONFIRMED/RELEASED) 해소

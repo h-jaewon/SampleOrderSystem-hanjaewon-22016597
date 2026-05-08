@@ -12,6 +12,7 @@ from faker import Faker
 from src.models.order import Order, OrderStatus
 from src.repositories.order_repository import OrderRepository
 from src.repositories.sample_repository import SampleRepository
+from src.services.order_service import OrderService
 from src.services.sample_service import SampleService
 
 fake = Faker("ko_KR")
@@ -52,21 +53,25 @@ def _inject(sample_repo: SampleRepository, order_repo: OrderRepository) -> None:
         registered[0],
     ]
 
-    # OrderService가 Phase 3에서 구현되기 전까지 OrderRepository를 직접 사용한다.
-    # Phase 3 완료 후 OrderService.place_order()로 교체할 것 (H-1).
+    order_service = OrderService(sample_repo, order_repo)
+
     for i, (status, sample) in enumerate(zip(statuses, sample_cycle), start=1):
-        order_id = f"ORD-{i:03d}"
         customer_name = fake.name()
         quantity = fake.random_int(min=1, max=20)
 
-        order = Order(
-            id=order_id,
-            sampleId=sample.id,
-            customerName=customer_name,
-            quantity=quantity,
-            status=status,
-        )
-        order_repo.add(order)
+        if status == OrderStatus.RESERVED:
+            order_service.place_order(sample.id, customer_name, quantity)
+        else:
+            # PRODUCING/CONFIRMED/RELEASED 상태는 Phase 4 이후 해소 예정이므로 직접 주입 유지 (H-1).
+            order_id = f"ORD-{i:03d}"
+            order = Order(
+                id=order_id,
+                sampleId=sample.id,
+                customerName=customer_name,
+                quantity=quantity,
+                status=status,
+            )
+            order_repo.add(order)
 
     print("  [더미 데이터 주입 완료]")
     print(f"  - 시료 {len(registered)}종 등록")
@@ -83,7 +88,7 @@ def main() -> None:
 
     if not only:
         from main import main as run_main
-        run_main(sample_repository=sample_repo)
+        run_main(sample_repository=sample_repo, order_repository=order_repo)
 
 
 if __name__ == "__main__":

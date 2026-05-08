@@ -34,10 +34,15 @@
   - [x] ~~`src/ui/display.py`~~ — 삭제 (MVC 리팩터링)
   - [x] ~~`src/ui/sample_menu.py`~~ — 삭제 (MVC 리팩터링)
 
-- [ ] **Phase 3**: 주문 접수 서비스
-  - [ ] `src/services/order_service.py`
-  - [ ] `tests/phase3/test_order_service.py`
-  - [ ] `src/ui/order_menu.py`
+- [x] **Phase 3**: 주문 접수 서비스
+  - [x] `src/services/order_service.py` — OrderService 구현 (place_order())
+  - [x] `src/views/order_view.py` — 주문 접수 뷰
+  - [x] `src/controllers/order_controller.py` — 주문 접수 컨트롤러
+  - [x] `tests/phase3/__init__.py`
+  - [x] `tests/phase3/test_order_service.py` — OrderService 단위 테스트 (11개)
+  - [x] `main.py` — 시료 주문 메뉴 활성화, OrderController 조립
+  - [x] `dummy.py` — RESERVED H-1 해소 (OrderService.place_order() 경유 교체)
+  - [x] `plan/design/phase3.md` — Phase 3 설계 문서
 
 - [ ] **Phase 4**: 주문 승인/거절 서비스
   - [ ] `src/services/approval_service.py`
