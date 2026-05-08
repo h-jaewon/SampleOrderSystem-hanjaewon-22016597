@@ -5,8 +5,8 @@ from src.services.sample_service import SampleService
 
 
 @pytest.fixture
-def service():
-    repo = SampleRepository()
+def service(db_path):
+    repo = SampleRepository(db_path=db_path)
     return SampleService(repo)
 
 

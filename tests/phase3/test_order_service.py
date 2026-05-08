@@ -10,13 +10,13 @@ from src.services.sample_service import SampleService
 
 
 @pytest.fixture
-def sample_repo():
-    return SampleRepository()
+def sample_repo(db_path):
+    return SampleRepository(db_path=db_path)
 
 
 @pytest.fixture
-def order_repo():
-    return OrderRepository()
+def order_repo(db_path):
+    return OrderRepository(db_path=db_path)
 
 
 @pytest.fixture

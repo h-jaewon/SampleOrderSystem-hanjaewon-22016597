@@ -29,6 +29,7 @@ class ApprovalService:
 
         if sample.stock >= order.quantity:
             order.status = OrderStatus.CONFIRMED
+            self._order_repository.update_status(order.id, OrderStatus.CONFIRMED)
         else:
             deficit = order.quantity - sample.stock
             planned_quantity = self._calculate_production_quantity(deficit, sample.yield_)
@@ -41,6 +42,7 @@ class ApprovalService:
             )
             self._production_queue.enqueue(job)
             order.status = OrderStatus.PRODUCING
+            self._order_repository.update_status(order.id, OrderStatus.PRODUCING)
 
         return order
 
@@ -52,6 +54,7 @@ class ApprovalService:
             raise ValueError("RESERVED 상태의 주문만 처리 가능합니다.")
 
         order.status = OrderStatus.REJECTED
+        self._order_repository.update_status(order.id, OrderStatus.REJECTED)
         return order
 
     def _calculate_production_quantity(self, deficit: int, yield_: float) -> int:

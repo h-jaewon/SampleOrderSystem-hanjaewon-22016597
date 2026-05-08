@@ -89,7 +89,7 @@ def test_sample_repository_add_and_get():
     sample = Sample(id="S001", name="AlphaChip", avgProductionTime=5.0, yield_=0.8)
     repo.add(sample)
     result = repo.get("S001")
-    assert result is sample
+    assert result == sample
 
 
 # ---------------------------------------------------------------------------
