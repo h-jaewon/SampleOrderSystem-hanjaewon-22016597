@@ -71,9 +71,39 @@
 ## ADR-006: 유효성 검사 책임 분리 — 모델 vs 서비스
 
 - **날짜:** 2026-05-08
-- **Phase:** Phase 1
+- **Phase:** Phase 1 (결정), Phase 2 (적용)
 - **결정:** Phase 1 도메인 모델은 유효성 검사를 수행하지 않는다. 입력값 검증(빈 문자열, 범위 초과 등)은 Phase 2+ 서비스 레이어의 책임으로 위임한다.
 - **이유:**
   - 단일 책임 원칙(SRP): 모델은 데이터 보유, 서비스는 비즈니스 규칙 적용.
   - Phase 1 범위를 최소화하여 안정적 기반 마련.
 - **영향:** `src/models/` 전체 — `__post_init__` 검증 없음.
+- **Phase 2 적용 결과:** `SampleService.register_sample()`에서 `name`, `avgProductionTime`, `yield_` 세 파라미터에 대한 유효성 검사를 순서대로 수행하며 위반 시 즉시 `ValueError`를 발생시킨다.
+
+---
+
+## ADR-007: SampleService 의존성 주입 방식 — 생성자 주입
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2
+- **결정:** `SampleService`는 `SampleRepository` 인스턴스를 생성자(`__init__`)에서 파라미터로 주입받는다. 서비스 내부에서 저장소를 직접 생성하지 않는다.
+- **이유:**
+  - 테스트 격리: 각 테스트 케이스가 독립적인 `SampleRepository` 인스턴스를 주입하여 상태 공유 없이 실행 가능.
+  - 느슨한 결합(Loose Coupling): 서비스가 저장소 구현 세부에 의존하지 않아 향후 교체 또는 Mock 적용 용이.
+  - 표준 DI 패턴 준수: 외부 프레임워크 없이 Python 기본 생성자 파라미터로 의존성 주입 구현.
+- **대안:** 서비스 내부에서 `SampleRepository()` 직접 인스턴스화 — 테스트 격리 불가로 배제.
+- **영향 파일:** `src/services/sample_service.py`
+
+---
+
+## ADR-008: 시료 ID 자동 생성 전략 — `len(get_all()) + 1` 기반 순번
+
+- **날짜:** 2026-05-08
+- **Phase:** Phase 2
+- **결정:** `register_sample()` 내부에서 `f"S{len(self._sample_repository.get_all()) + 1:03d}"` 형식으로 ID를 자동 생성한다.
+- **이유:**
+  - PRD에서 시료 삭제 기능을 정의하지 않으므로, 등록 수 기반 단조 증가 순번이 중복 없이 고유함을 보장한다.
+  - 별도 카운터 상태 관리 없이 저장소 크기에서 직접 순번을 도출하여 구현 단순화.
+  - `SampleRepository.add()`가 중복 ID에 대해 `ValueError`를 발생시켜(ADR-004) 이중 안전망 역할을 한다.
+- **형식:** `S{순번:03d}` — 예) `S001`, `S002`, `S999`
+- **제약:** 시료 삭제 기능이 추가될 경우 이 전략을 재검토해야 한다.
+- **영향 파일:** `src/services/sample_service.py`

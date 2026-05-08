@@ -6,7 +6,7 @@
 
 ## 현재 브랜치
 
-`feat/phase-1-domain-models` → PR 후 `main` merge 예정
+`feat/phase-2-sample-service` → PR 후 `main` merge 예정
 
 ---
 
@@ -30,25 +30,34 @@
 | `pytest.ini` | 완료 |
 | `requirements.txt` | 완료 |
 
+### Phase 2: 시료 관리 서비스 — **완료**
+
+| 파일 | 상태 |
+|------|------|
+| `src/services/__init__.py` | 완료 |
+| `src/services/sample_service.py` | 완료 |
+| `tests/phase2/__init__.py` | 완료 |
+| `tests/phase2/test_sample_service.py` | 완료 (17개 테스트) |
+| `plan/design/phase2.md` | 완료 |
+
 ### 테스트 결과 (SubAgent3 판정)
 
 - 판정: **PASS**
-- 테스트 수: 22개 전원 통과
-- 커버리지: 99%
+- Phase 1: 22개 테스트 전원 통과, 커버리지 99%
+- Phase 2: 17개 테스트 전원 통과, `src/services/sample_service.py` 커버리지 100%
 
 ### 컴플라이언스 결과 (SubAgent4 판정)
 
 - 판정: **PASS**
 - Critical: 0건
 - High: 0건
-- Medium: 1건 → `sample.py` 미사용 `field` import (본 커밋에서 수정 완료)
 
 ---
 
 ## 다음 단계
 
-**Phase 2: 시료 관리 서비스** (`feat/phase-2-sample-service`)
+**Phase 3: 주문 접수 서비스** (`feat/phase-3-order-service`)
 
-- `src/services/sample_service.py` 구현
-- `tests/phase2/test_sample_service.py` 작성
-- SampleService: `register_sample()`, `get_sample()`, `get_all_samples()`, `search_samples_by_name()`
+- `src/services/order_service.py` 구현
+- `tests/phase3/test_order_service.py` 작성
+- OrderService: `place_order()`, `get_order()`, `get_all_orders()`, `get_orders_by_status()`
