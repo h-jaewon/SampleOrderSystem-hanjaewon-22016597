@@ -1,7 +1,8 @@
+from src.controllers.sample_controller import SampleController
 from src.repositories.sample_repository import SampleRepository
 from src.services.sample_service import SampleService
-from src.ui.display import input_prompt, print_error
-from src.ui.sample_menu import show_sample_menu
+from src.views.display import input_prompt, print_error
+from src.views.sample_view import SampleView
 
 
 def _print_main_menu() -> None:
@@ -18,16 +19,20 @@ def _print_main_menu() -> None:
     print("+======================================================+")
 
 
-def main() -> None:
-    sample_repository = SampleRepository()
+def main(sample_repository: SampleRepository | None = None) -> None:
+    if sample_repository is None:
+        sample_repository = SampleRepository()
+
     sample_service = SampleService(sample_repository)
+    sample_view = SampleView()
+    sample_controller = SampleController(sample_service, sample_view)
 
     while True:
         _print_main_menu()
         choice = input_prompt("선택")
 
         if choice == "1":
-            show_sample_menu(sample_service)
+            sample_controller.run()
         elif choice in ("2", "3", "4", "5", "6"):
             print("\n  아직 준비 중인 기능입니다.")
         elif choice == "0":
