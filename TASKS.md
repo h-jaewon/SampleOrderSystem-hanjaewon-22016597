@@ -17,16 +17,21 @@
   - [x] `plan/design/phase1.md` — Phase 1 설계 문서
   - [x] `pytest.ini`, `requirements.txt` 설정
 
-- [x] **Phase 2**: 시료 관리 서비스
+- [x] **Phase 2**: 시료 관리 서비스 + UI
   - [x] `src/services/__init__.py`
   - [x] `src/services/sample_service.py` — SampleService 구현
   - [x] `tests/phase2/__init__.py`
   - [x] `tests/phase2/test_sample_service.py` — SampleService 단위 테스트 (17개, 커버리지 100%)
   - [x] `plan/design/phase2.md` — Phase 2 설계 문서
+  - [x] `src/ui/__init__.py` — UI 패키지 초기화
+  - [x] `src/ui/display.py` — 공통 출력/입력 유틸 (`print_header`, `print_success`, `print_error`, `input_prompt`, `pause`)
+  - [x] `src/ui/sample_menu.py` — 시료 관리 메뉴 UI (등록/조회/검색)
+  - [x] `main.py` — 메인 진입점 및 최상위 메뉴 (KeyboardInterrupt 처리 포함)
 
 - [ ] **Phase 3**: 주문 접수 서비스
   - [ ] `src/services/order_service.py`
   - [ ] `tests/phase3/test_order_service.py`
+  - [ ] `src/ui/order_menu.py`
 
 - [ ] **Phase 4**: 주문 승인/거절 서비스
   - [ ] `src/services/approval_service.py`
